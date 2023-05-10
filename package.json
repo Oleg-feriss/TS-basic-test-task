@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "tsc": "tsc",
+    "watch-tsc": "tsc -w",
+    "deploy": "node ./dist/js/index.js",
+    "start": "npm run deploy"
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Oleg-feriss/TS-basic-test-task/issues"
   },
-  "homepage": "https://github.com/Oleg-feriss/TS-basic-test-task#readme"
+  "homepage": "https://github.com/Oleg-feriss/TS-basic-test-task#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
 }
