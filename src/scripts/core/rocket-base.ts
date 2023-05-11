@@ -1,6 +1,6 @@
 interface IRocketBase {
   name: string;
-  launch(): void;
+  launch: () => void;
 }
 
 export abstract class RocketBase implements IRocketBase {
