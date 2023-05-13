@@ -1,0 +1,17 @@
+{
+  "name": "task-3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "watch-tsc": "tsc -w",
+    "deploy": "node ./dist/js/index.js",
+    "start": "npm run deploy"
+  },
+  "author": "Oleh Tarasiuk",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
