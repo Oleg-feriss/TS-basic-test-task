@@ -6,9 +6,9 @@
   "scripts": {
     "tsc": "tsc",
     "watch-tsc": "tsc -w",
-    "deploy": "node ./dist/js/index.js",
+    "deploy": "node ./dist/js/src/scripts/core/index.js",
     "start:demo": "npm run deploy",
-    "start:server": "node ./dist/js/server/index.js"
+    "start:server": "node ./dist/js/src/scripts/server/index.js"
   },
   "repository": {
     "type": "git",
