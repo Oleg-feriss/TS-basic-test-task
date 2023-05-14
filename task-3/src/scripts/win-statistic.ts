@@ -1,105 +1,86 @@
 import { Stat } from './simulation';
 
-interface StatInformation {
-  winAmount: number;
-  hitCount: number;
-}
-
 export class WinStatistic implements Stat {
-  private stats: StatInformation[] = [];
-  private mergedStats: StatInformation[] = [];
+  private stats: Map<number, number> = new Map();
+  private mergedStats: Map<number, number> = new Map();
+
+  private filterAndAddStats(
+    statistic: Map<number, number>,
+    winAmount: number,
+    hitCount: number
+  ): void {
+    const isWinAmountAlreadyExists = statistic.has(winAmount);
+
+    if (isWinAmountAlreadyExists) {
+      let hitCountOfWinAmount = statistic.get(winAmount) as number;
+      statistic.set(winAmount, (hitCountOfWinAmount += hitCount));
+      return;
+    }
+
+    statistic.set(winAmount, hitCount);
+  }
+
+  private roundWinAmount(winAmount: number) {
+    return Math.round(winAmount * 10) / 10;
+  }
 
   public log(winAmount: number, hitCount: number): void {
     if (winAmount < 0 || hitCount <= 0) {
       return;
     }
 
-    const roundedWinAmount = Math.round(winAmount * 10) / 10;
+    const roundedWinAmount = this.roundWinAmount(winAmount);
 
-    const isAlreadyWinAmount = this.stats.find(
-      (stat) => stat.winAmount === roundedWinAmount
-    );
-
-    if (isAlreadyWinAmount) {
-      isAlreadyWinAmount.hitCount += hitCount;
-      return;
-    }
-
-    this.stats.push({ winAmount: roundedWinAmount, hitCount });
+    this.filterAndAddStats(this.stats, roundedWinAmount, hitCount);
   }
 
   public getHitCount(winAmount: number): number {
-    const currentWinAmount = this.mergedStats.find(
-      (mergedStat) => mergedStat.winAmount === Math.round(winAmount * 10) / 10
-    );
+    const roundedWinAmount = this.roundWinAmount(winAmount);
+    const currentHitCountOfWinAmount = this.mergedStats.get(roundedWinAmount);
 
-    if (!currentWinAmount) {
+    if (!currentHitCountOfWinAmount) {
       return 0;
     }
 
-    return currentWinAmount.hitCount;
+    return currentHitCountOfWinAmount;
   }
 
   public merge(anotherStat: WinStatistic): void {
-    if (!this.mergedStats.length) {
-      this.mergedStats = [...anotherStat.stats];
-      return;
-    }
-
-    this.mergedStats = this.mergedStats.reduce((accumulator, current) => {
-      const { winAmount, hitCount } = current;
-
-      const existingWinAmount = anotherStat.stats.find((stat) => {
-        return winAmount === stat.winAmount;
-      });
-
-      if (existingWinAmount) {
-        accumulator.push({
-          winAmount,
-          hitCount: hitCount + existingWinAmount.hitCount,
-        });
-
-        return accumulator;
-      }
-
-      accumulator.push(current);
-      return accumulator;
-    }, [] as StatInformation[]);
+    anotherStat.stats.forEach((hitCount, winAmount) => {
+      this.filterAndAddStats(this.mergedStats, winAmount, hitCount);
+    });
   }
 
   public print(): void {
-    const sumOfAllWins = this.mergedStats.reduce((accumulator, mergedStat) => {
-      return accumulator + mergedStat.winAmount * mergedStat.hitCount;
-    }, 0);
+    let sumOfAllWins = 0;
+    this.mergedStats.forEach((hitCount, winAmount) => {
+      sumOfAllWins += winAmount * hitCount;
+    });
 
-    const averageWinAmount =
-      this.mergedStats.reduce((averageAmount, mergedStat) => {
-        return averageAmount + mergedStat.winAmount;
-      }, 0) / this.mergedStats.length;
+    let sumOfPossibleWins = 0;
+    this.mergedStats.forEach((_hitCount, winAmount) => {
+      sumOfPossibleWins += winAmount;
+    });
 
-    const minMaxWinAmount = this.mergedStats
-      .filter((mergedStat) => mergedStat.winAmount > 0)
-      .reduce(
-        ([min, max], stat) => {
-          return [Math.min(min, stat.winAmount), Math.max(max, stat.winAmount)];
-        },
-        [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]
-      );
+    const averageWinAmount = sumOfPossibleWins / this.mergedStats.size;
 
-    const sorted = [...this.mergedStats].sort(
-      (a, b) => a.winAmount - b.winAmount
-    );
+    const winAmountArray = Array.from(this.mergedStats.keys());
+
+    const minWinAmount = Math.min(...winAmountArray.filter(Boolean));
+    const maxWinAmount = Math.max(...this.mergedStats.keys());
+
+    const sorted = [...this.mergedStats.entries()].sort((a, b) => a[0] - b[0]);
 
     console.log(`
       Total win amount: ${sumOfAllWins}.
       The average win amount: ${averageWinAmount}.
-      The smallest non-zero win is ${minMaxWinAmount[0]}, the biggest is ${minMaxWinAmount[1]}.
+      The smallest non-zero win is ${minWinAmount}, the biggest is ${maxWinAmount}.
 
       All unique wins (sorted 0..9) : 
     `);
 
     sorted.forEach((item, index) => {
-      console.log(`${index + 1}. ${item.winAmount}: ${item.hitCount}`);
+      console.log(`${index + 1}. ${item[0]}: ${item[1]}`);
     });
   }
 }

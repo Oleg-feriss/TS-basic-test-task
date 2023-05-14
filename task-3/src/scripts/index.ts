@@ -1,7 +1,6 @@
 import { WinStatistic } from './win-statistic';
-import { CreateStatFn, Simulation, Stat } from './simulation';
+import { CreateStatFn, Simulation } from './simulation';
 
-// const winStatistic: Stat = new WinStatistic();
 const createStat: CreateStatFn = () => new WinStatistic();
 
 Simulation.runSimulation(createStat);
